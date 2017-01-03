@@ -3,7 +3,7 @@ package bytequeue
 import (
 	//"fmt"
 	"encoding/binary"
-	//"errors"
+	"errors"
 )
 
 // Size constants
@@ -46,8 +46,14 @@ func (bq *ByteQueue) GetByteArr() []byte {
 }
 
 // Push ...
+// return the number of bytes copied
 func (bq *ByteQueue) Push(data []byte) (int, error) {
 	dataLen := len(data)
+	entryLen := headerEntrySize + dataLen
+
+	if entryLen > bq.capacity {
+		return 0, errors.New("Entry size is bigger than capacity.")
+	}
 
 	if (headerEntrySize + dataLen) > bq.availableSpaceAfterTail() {
 		// pop some entries until the space is enough
@@ -63,6 +69,8 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	bq.copyByte(data)
 
 	//
+	bq.count++
+
 	return bq.tail, nil
 }
 
