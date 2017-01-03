@@ -2,7 +2,8 @@ package bytequeue
 
 import (
 	//"fmt"
-	"errors"
+	"encoding/binary"
+	//"errors"
 )
 
 // Size constants
@@ -34,10 +35,14 @@ type queueError struct {
 // capacity: in MB.
 func NewByteQueue(capacityMB int) *ByteQueue {
 	return &ByteQueue{
-		byteArr:      make([]byte, capacityMB*MB),
-		capacity:     capacityMB * MB,
+		byteArr:      make([]byte, capacityMB),
+		capacity:     capacityMB,
 		headerBuffer: make([]byte, headerEntrySize),
 	}
+}
+
+func (bq *ByteQueue) GetByteArr() []byte {
+	return bq.byteArr
 }
 
 // Push ...
@@ -45,17 +50,36 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	dataLen := len(data)
 
 	if (headerEntrySize + dataLen) > bq.availableSpaceAfterTail() {
-		// pop some entries
+		// pop some entries until the space is enough
+		// also check do not exceed the size.
 	}
 
-	index := bq.tail
+	// copy header
+	binary.BigEndian.PutUint32(bq.headerBuffer, uint32(dataLen))
 
-	return index, nil
+	bq.copyByte(bq.headerBuffer)
+
+	// copy data
+	bq.copyByte(data)
+
+	//
+	return bq.tail, nil
+}
+
+func (bq *ByteQueue) copyByte(data []byte) {
+	for _, v := range data {
+		bq.byteArr[bq.tail] = v
+		bq.tail++
+		if bq.tail == bq.capacity {
+			bq.tail = 0
+		}
+	}
 }
 
 func (bq *ByteQueue) availableSpaceAfterTail() int {
 	if bq.tail >= bq.head {
-		return bq.capacity - (bq.tail - bq.head)
+		//return bq.capacity - (bq.tail - bq.head)
+		return bq.capacity - bq.tail + bq.head
 	}
 
 	return bq.head - bq.tail

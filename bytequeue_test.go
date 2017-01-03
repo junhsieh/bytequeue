@@ -6,11 +6,18 @@ import (
 )
 
 func TestDebug(t *testing.T) {
-	queue := NewByteQueue(1)
+	queue := NewByteQueue(30)
 
-	if index, err := queue.Push([]byte("How")); err != nil {
-	} else {
-		fmt.Printf("index: %d\n", index)
+	var index int
+	var err error
+
+	for i := 0; i < 3; i++ {
+		if index, err = queue.Push([]byte("AAA")); err != nil {
+			fmt.Printf("err: %v\n", err)
+		}
 	}
+
+	fmt.Printf("index: %v\n", index)
+	fmt.Printf("byteArr: %v\n", queue.GetByteArr())
 	//t.Errorf("util.JSONDeepEqual(%s, %s) = %v", o.EncodeString(), s1, ok)
 }
