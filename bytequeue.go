@@ -1,9 +1,9 @@
 package bytequeue
 
 import (
-	//"fmt"
 	"encoding/binary"
 	"errors"
+	"fmt"
 )
 
 // Size constants
@@ -45,6 +45,48 @@ func (bq *ByteQueue) GetByteArr() []byte {
 	return bq.byteArr
 }
 
+func (bq *ByteQueue) GetHead() int {
+	return bq.head
+}
+func (bq *ByteQueue) GetTail() int {
+	return bq.tail
+}
+
+func (bq *ByteQueue) getNextHead() {
+	// get header
+	for i := 0; i < headerEntrySize; i++ {
+		bq.headerBuffer[i] = bq.byteArr[bq.head]
+		bq.byteArr[bq.head] = 'X'
+		bq.head++
+
+		if bq.head == bq.capacity {
+			bq.head = 0
+		}
+	}
+
+	// data
+	dataLen := int(binary.BigEndian.Uint32(bq.headerBuffer))
+
+	for i := 0; i < dataLen; i++ {
+		bq.byteArr[bq.head] = 'X'
+		bq.head++
+
+		if bq.head == bq.capacity {
+			bq.head = 0
+		}
+	}
+	//bq.head += dataLen
+	//return bq.head
+}
+
+func (bq *ByteQueue) Pop() {
+	fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
+	fmt.Printf("byteArr (befor pop): %02v\n", bq.GetByteArr())
+	bq.getNextHead()
+	fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
+	fmt.Printf("byteArr (after pop): %02v\n", bq.GetByteArr())
+}
+
 // Push ...
 // return the number of bytes copied
 func (bq *ByteQueue) Push(data []byte) (int, error) {
@@ -55,18 +97,28 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 		return 0, errors.New("Entry size is bigger than capacity.")
 	}
 
-	if (headerEntrySize + dataLen) > bq.availableSpaceAfterTail() {
-		// pop some entries until the space is enough
-		// also check do not exceed the size.
+	popCount := 0
+
+	for {
+		if entryLen > bq.availableSpaceAfterTail() {
+			// pop some entries until the space is enough
+			// also check do not exceed the size.
+			bq.Pop()
+
+			popCount++
+		} else {
+			//fmt.Printf("There are %d pops\n", popCount)
+			break
+		}
 	}
 
 	// copy header
 	binary.BigEndian.PutUint32(bq.headerBuffer, uint32(dataLen))
 
-	bq.copyByte(bq.headerBuffer)
+	bq.setByteArr(bq.headerBuffer)
 
 	// copy data
-	bq.copyByte(data)
+	bq.setByteArr(data)
 
 	//
 	bq.count++
@@ -74,7 +126,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	return bq.tail, nil
 }
 
-func (bq *ByteQueue) copyByte(data []byte) {
+func (bq *ByteQueue) setByteArr(data []byte) {
 	for _, v := range data {
 		bq.byteArr[bq.tail] = v
 		bq.tail++
