@@ -49,9 +49,8 @@ func TestAvailableSpace(t *testing.T) {
 
 	var dataLen int
 	var data string
-	//var index int
 
-	//checkHead := 0
+	checkHead := 0
 	checkTail := 0
 	checkSpaceLeft := queue.capacity
 
@@ -64,6 +63,15 @@ func TestAvailableSpace(t *testing.T) {
 		}
 
 		// check head
+		checkHead = checkHead + queue.numOfPopBytes
+
+		if checkHead >= queue.capacity {
+			checkHead = checkHead - queue.capacity
+		}
+
+		if queue.head != checkHead {
+			t.Errorf("checkHead %d: %v vs %v; head: %d; tail: %d; count: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, dataLen)
+		}
 
 		// check tail
 		checkTail = checkTail + headerEntrySize + dataLen

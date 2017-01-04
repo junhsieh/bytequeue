@@ -139,8 +139,6 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	// save index before pushing
 	index := bq.tail
 
-	//popCount := 0 // DEBUG
-
 	for {
 		//fmt.Printf("entryLen: %d; available: %d; head: %d; tail: %d\n",
 		//	entryLen,
@@ -152,10 +150,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 			// pop some entries until the space is enough
 			// also check do not exceed the size.
 			bq.Pop(entryLen)
-
-			//popCount++
 		} else {
-			//fmt.Printf("There are %d pops\n", popCount)
 			break
 		}
 	}
@@ -182,6 +177,7 @@ func (bq *ByteQueue) setByteArr(data []byte) {
 	for _, v := range data {
 		bq.byteArr[bq.tail] = v
 		bq.tail++
+
 		if bq.tail == bq.capacity {
 			bq.tail = 0
 		}
