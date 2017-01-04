@@ -2,12 +2,16 @@ package bytequeue
 
 import (
 	"fmt"
+	"math/rand"
 )
 
 const (
 	ColorBegin = "\033["
 	ColorEnd   = "\033[0m"
 )
+
+// without X
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYZ"
 
 func (bq *ByteQueue) debugInitByteArr() {
 	for k, _ := range bq.byteArr {
@@ -52,4 +56,16 @@ func (bq *ByteQueue) debugGenByte() string {
 		str += fmt.Sprintf("%02d ", i)
 	}
 	return str + ")"
+}
+
+func (bq *ByteQueue) debugRandStringBytes(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
+}
+
+func (bq *ByteQueue) debugRandInt(min int, max int) int {
+	return min + rand.Intn(max-min)
 }

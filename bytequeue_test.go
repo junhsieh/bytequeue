@@ -2,7 +2,9 @@ package bytequeue
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 )
 
 func TestDebug(t *testing.T) {
@@ -13,12 +15,15 @@ func TestDebug(t *testing.T) {
 	var index int
 	var err error
 
-	for i := 0; i < 7; i++ {
+	//str := "AAA"
+	str := "PZrbdBGRzbiBlWKaSuqqgjBYrqPc"
+
+	for i := 0; i < 1; i++ {
 		fmt.Printf("========================================")
 		fmt.Printf("========================================")
 		fmt.Printf("========================================\n")
 
-		if index, err = queue.Push([]byte("AAA")); err != nil {
+		if index, err = queue.Push([]byte(str)); err != nil {
 			fmt.Printf("err: %v\n", err)
 		}
 	}
@@ -32,18 +37,28 @@ func TestDebug(t *testing.T) {
 }
 
 func TestAvailableSpace(t *testing.T) {
-	queue := NewByteQueue(30)
+	rand.Seed(time.Now().UTC().UnixNano())
+
+	queueSize := 30
+	queue := NewByteQueue(queueSize)
 	queue.debugInitByteArr()
 
-	for i := 0; i < 70000; i++ {
-		if _, err := queue.Push([]byte("AAA")); err != nil {
-			t.Errorf("ERR: queue.Push: %v", err)
+	var strSize int
+	var str string
+
+	for i := 0; i < 70; i++ {
+		strSize = queue.debugRandInt(0, queueSize-headerEntrySize)
+		str = queue.debugRandStringBytes(strSize)
+
+		if _, err := queue.Push([]byte(str)); err != nil {
+			t.Errorf("queue.Push([]byte(%d %s)): %v", strSize, str, err)
 		}
 
 		if queue.debugCountX() != queue.availableSpaceAfterTail() {
-			t.Errorf("ERR: availableSpaceAfterTail: %v %v", queue.debugCountX(), queue.availableSpaceAfterTail())
+			t.Errorf("availableSpaceAfterTail: %v vs %v; head: %d; tail: %d", queue.debugCountX(), queue.availableSpaceAfterTail(), queue.head, queue.tail)
 		}
 	}
+
 }
 
 func BenchmarkPush(b *testing.B) {
