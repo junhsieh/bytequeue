@@ -23,7 +23,7 @@ func TestDebug(t *testing.T) {
 	//data := "AAA"
 	data := "PZrbdBGRzbiBlWKaSuqqgjBYrq"
 
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 10; i++ {
 		if _, err = queue.Push([]byte(data)); err != nil {
 			fmt.Printf("err: %v\n", err)
 		}

@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // Size constants
@@ -108,9 +109,7 @@ func (bq *ByteQueue) Pop() ([]byte, error) {
 func (bq *ByteQueue) Push(data []byte) (int, error) {
 	// DEBUG
 	if bq.enableByteArrDetail == true {
-		fmt.Printf("========================================")
-		fmt.Printf("========================================")
-		fmt.Printf("========================================\n")
+		fmt.Printf(strings.Repeat("=", 130) + "\n")
 	}
 
 	// DEBUG: for testing purpose.
@@ -125,7 +124,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 		return -1, errors.New("Entry size is bigger than capacity.")
 	}
 
-	// save index before pushing
+	// save index for later use before pushing
 	index := bq.tail
 
 	for {
