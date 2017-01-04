@@ -8,7 +8,7 @@ import (
 func TestDebug(t *testing.T) {
 	queue := NewByteQueue(30)
 	queue.IsDebug = true
-	queue.DebugInitByteArr()
+	queue.debugInitByteArr()
 
 	var index int
 	var err error
@@ -24,24 +24,24 @@ func TestDebug(t *testing.T) {
 	}
 
 	fmt.Printf("\n")
-	fmt.Printf("head: %v\n", queue.GetHead())
-	fmt.Printf("tail: %v\n", queue.GetTail())
+	fmt.Printf("head: %v\n", queue.head)
+	fmt.Printf("tail: %v\n", queue.tail)
 	fmt.Printf("index: %v\n", index)
-	//fmt.Printf("byteArr (afte push): %v\n", queue.GetByteArr())
+	//fmt.Printf("byteArr (afte push): %v\n", queue.byteArr)
 	//t.Errorf("util.JSONDeepEqual(%s, %s) = %v", o.EncodeString(), s1, ok)
 }
 
 func TestAvailableSpace(t *testing.T) {
 	queue := NewByteQueue(30)
-	queue.DebugInitByteArr()
+	queue.debugInitByteArr()
 
 	for i := 0; i < 70000; i++ {
 		if _, err := queue.Push([]byte("AAA")); err != nil {
 			t.Errorf("ERR: queue.Push: %v", err)
 		}
 
-		if queue.DebugCountX() != queue.availableSpaceAfterTail() {
-			t.Errorf("ERR: availableSpaceAfterTail: %v %v", queue.DebugCountX(), queue.availableSpaceAfterTail())
+		if queue.debugCountX() != queue.availableSpaceAfterTail() {
+			t.Errorf("ERR: availableSpaceAfterTail: %v %v", queue.debugCountX(), queue.availableSpaceAfterTail())
 		}
 	}
 }

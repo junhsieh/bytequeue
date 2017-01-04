@@ -13,11 +13,6 @@ const (
 )
 
 const (
-	ColorBegin = "\033["
-	ColorEnd   = "\033[0m"
-)
-
-const (
 	// Number of bytes used to keep the entry size information in the header.
 	headerEntrySize = 4
 )
@@ -33,10 +28,6 @@ type ByteQueue struct {
 	IsDebug      bool // can be removed later.
 }
 
-type queueError struct {
-	message string
-}
-
 // NewByteQueue initializes new ByteQueue.
 // capacity: in MB.
 func NewByteQueue(capacityMB int) *ByteQueue {
@@ -45,54 +36,6 @@ func NewByteQueue(capacityMB int) *ByteQueue {
 		capacity:     capacityMB,
 		headerBuffer: make([]byte, headerEntrySize),
 	}
-}
-
-func (bq *ByteQueue) DebugInitByteArr() {
-	for k, _ := range bq.byteArr {
-		bq.byteArr[k] = 'X'
-	}
-}
-
-func (bq *ByteQueue) DebugCountX() int {
-	count := 0
-
-	for _, v := range bq.byteArr {
-		if v == 'X' {
-			count++
-		}
-	}
-
-	return count
-}
-
-func (bq *ByteQueue) GetByteArr() []byte {
-	return bq.byteArr
-}
-
-func (bq *ByteQueue) GetHead() int {
-	return bq.head
-}
-
-func (bq *ByteQueue) GetTail() int {
-	return bq.tail
-}
-
-func (bq *ByteQueue) highlightByteArr(data []byte) string {
-	str := "["
-
-	for k, v := range data {
-		if k == bq.head {
-			str += ColorBegin + "31m" + fmt.Sprintf("%02v", v) + ColorEnd + " "
-		} else if k == bq.tail {
-			str += ColorBegin + "35m" + fmt.Sprintf("%02v", v) + ColorEnd + " "
-		} else if v == 'X' {
-			str += ColorBegin + "32m" + fmt.Sprintf("%02v", v) + ColorEnd + " "
-		} else {
-			str += fmt.Sprintf("%02v", v) + " "
-		}
-	}
-
-	return str + "]"
 }
 
 func (bq *ByteQueue) getNextHeadV1() {
@@ -123,25 +66,16 @@ func (bq *ByteQueue) getNextHeadV1() {
 func (bq *ByteQueue) Pop() {
 	//if bq.IsDebug == true {
 	//	fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
-	//	fmt.Printf("byteArr (befor pop): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
+	//	fmt.Printf("byteArr (befor pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
 	//}
 
 	bq.getNextHeadV1()
 
 	if bq.IsDebug == true {
 		fmt.Printf("Pop:\t\thead: %d\t\ttail: %d\t\tavailable: %d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
-		fmt.Printf("                   : %s\n", bq.TmpGenByte())
-		fmt.Printf("byteArr (after pop): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
+		fmt.Printf("                   : %s\n", bq.debugGenByte())
+		fmt.Printf("byteArr (after pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
 	}
-}
-
-func (bq *ByteQueue) TmpGenByte() string {
-	str := "["
-
-	for i := 0; i < bq.capacity; i++ {
-		str += fmt.Sprintf("%02d ", i)
-	}
-	return str + "]"
 }
 
 // Push ...
@@ -180,7 +114,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	bq.count++
 
 	if bq.IsDebug == true {
-		fmt.Printf("byteArr (afte push): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
+		fmt.Printf("byteArr (afte push): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
 	}
 
 	// TODO: what value should be return?
