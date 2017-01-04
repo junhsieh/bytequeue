@@ -73,7 +73,12 @@ func (bq *ByteQueue) Pop(debugEntryLen int) {
 	bq.count--
 
 	if bq.IsDebug == true {
-		fmt.Printf("info    (after pop):\t\tentryLen: %d\t\thead: %d\t\ttail: %d\t\tcount: %d\t\tavailable: %d\n", debugEntryLen, bq.head, bq.tail, bq.count, bq.availableSpaceAfterTail())
+		fmt.Printf("info    (after pop):\t\tentryLen: %d\t\thead: %d\t\ttail: %d\t\tcount: %d\t\tavailable: %d\n",
+			debugEntryLen,
+			bq.head,
+			bq.tail,
+			bq.count,
+			bq.availableSpaceAfterTail())
 		fmt.Printf("                   : %s\n", bq.debugGenByte())
 		fmt.Printf("byteArr (after pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
 		fmt.Printf("\n")
@@ -82,6 +87,12 @@ func (bq *ByteQueue) Pop(debugEntryLen int) {
 
 // Push ...
 func (bq *ByteQueue) Push(data []byte) (int, error) {
+	if bq.IsDebug == true {
+		fmt.Printf("========================================")
+		fmt.Printf("========================================")
+		fmt.Printf("========================================\n")
+	}
+
 	dataLen := len(data)
 	entryLen := headerEntrySize + dataLen
 
