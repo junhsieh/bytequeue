@@ -12,7 +12,7 @@ func TestDebug(t *testing.T) {
 	var index int
 	var err error
 
-	for i := 0; i < 6; i++ {
+	for i := 0; i < 7; i++ {
 		fmt.Printf("========================================")
 		fmt.Printf("========================================")
 		fmt.Printf("========================================\n")
@@ -22,6 +22,7 @@ func TestDebug(t *testing.T) {
 		}
 	}
 
+	fmt.Printf("\n")
 	fmt.Printf("head: %v\n", queue.GetHead())
 	fmt.Printf("tail: %v\n", queue.GetTail())
 	fmt.Printf("index: %v\n", index)

@@ -103,17 +103,27 @@ func (bq *ByteQueue) getNextHeadV1() {
 }
 
 func (bq *ByteQueue) Pop() {
-	if bq.IsDebug == true {
-		fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
-		fmt.Printf("byteArr (befor pop): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
-	}
+	//if bq.IsDebug == true {
+	//	fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
+	//	fmt.Printf("byteArr (befor pop): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
+	//}
 
 	bq.getNextHeadV1()
 
 	if bq.IsDebug == true {
-		fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
+		fmt.Printf("Pop:\t\thead: %d\t\ttail: %d\t\tavailable: %d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
+		fmt.Printf("                   : %s\n", bq.TmpGenByte())
 		fmt.Printf("byteArr (after pop): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
 	}
+}
+
+func (bq *ByteQueue) TmpGenByte() string {
+	str := "["
+
+	for i := 0; i < bq.capacity; i++ {
+		str += fmt.Sprintf("%02d ", i)
+	}
+	return str + "]"
 }
 
 // Push ...
