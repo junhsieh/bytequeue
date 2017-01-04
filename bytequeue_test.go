@@ -20,11 +20,11 @@ func TestDebug(t *testing.T) {
 	//var index int
 	var err error
 
-	//str := "AAA"
-	str := "PZrbdBGRzbiBlWKaSuqqgjBYrq"
+	//data := "AAA"
+	data := "PZrbdBGRzbiBlWKaSuqqgjBYrq"
 
 	for i := 0; i < 1; i++ {
-		if _, err = queue.Push([]byte(str)); err != nil {
+		if _, err = queue.Push([]byte(data)); err != nil {
 			fmt.Printf("err: %v\n", err)
 		}
 	}
@@ -42,42 +42,53 @@ func TestAvailableSpace(t *testing.T) {
 
 	queueSize := 30
 	queue := NewByteQueue(queueSize)
+	queue.enableClearByte = true
 	//queue.enableByteArrDetail = true
 	queue.enableNumOfPopBytesTrack = true
 	queue.debugInitByteArr()
 
-	var strSize int
-	var str string
+	var dataLen int
+	var data string
+	//var index int
 
-	checkHead := 0
+	//checkHead := 0
 	checkTail := 0
 	checkSpaceLeft := queue.capacity
 
 	for i := 0; i < 100000; i++ {
-		strSize = queue.debugRandInt(0, queue.capacity-headerEntrySize+1)
-		str = queue.debugRandStringBytes(strSize)
+		dataLen = queue.debugRandInt(0, queue.capacity-headerEntrySize+1)
+		data = queue.debugRandStringBytes(dataLen)
 
-		if _, err := queue.Push([]byte(str)); err != nil {
-			t.Errorf("queue.Push([]byte(%d %s)): %v", strSize, str, err)
+		if _, err := queue.Push([]byte(data)); err != nil {
+			t.Errorf("queue.Push([]byte(%d %s)): %v", dataLen, data, err)
 		}
 
 		// check head
 
 		// check tail
+		checkTail = checkTail + headerEntrySize + dataLen
+
+		if checkTail >= queue.capacity {
+			checkTail = checkTail - queue.capacity
+		}
+
+		if queue.tail != checkTail {
+			t.Errorf("checkTail %d: %v vs %v; head: %d; tail: %d; count: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, dataLen)
+		}
 
 		// check available space
-		checkSpaceLeft = checkSpaceLeft - headerEntrySize - strSize + queue.numOfPopBytes
+		checkSpaceLeft = checkSpaceLeft - headerEntrySize - dataLen + queue.numOfPopBytes
 
 		if queue.availableSpaceAfterTail() != queue.debugCountX() {
-			t.Errorf("queue.debugCountX() %d: %v vs %v; head: %d; tail: %d; count: %d; strSize: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, strSize)
+			t.Errorf("queue.debugCountX() %d: %v vs %v; head: %d; tail: %d; count: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, dataLen)
 		}
 
 		if queue.availableSpaceAfterTail() != checkSpaceLeft {
-			t.Errorf("checkSpaceLeft %d: %v vs %v; head: %d; tail: %d; count: %d; strSize: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, strSize)
+			t.Errorf("checkSpaceLeft %d: %v vs %v; head: %d; tail: %d; count: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, dataLen)
 		}
 
 		if queue.availableSpaceAfterTail() != queue.numOfAvailableBytes {
-			t.Errorf("queue.numOfAvailableBytes %d: %v vs %v; head: %d; tail: %d; count: %d; strSize: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, strSize)
+			t.Errorf("queue.numOfAvailableBytes %d: %v vs %v; head: %d; tail: %d; count: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, dataLen)
 		}
 	}
 }
@@ -86,13 +97,13 @@ func BenchmarkPush(b *testing.B) {
 	queueSize := 30
 	queue := NewByteQueue(queueSize)
 
-	var strSize int
-	var str string
+	var dataLen int
+	var data string
 
 	for i := 0; i < b.N; i++ {
-		strSize = queue.debugRandInt(0, queueSize-headerEntrySize+1)
-		str = queue.debugRandStringBytes(strSize)
+		dataLen = queue.debugRandInt(0, queueSize-headerEntrySize+1)
+		data = queue.debugRandStringBytes(dataLen)
 
-		queue.Push([]byte(str))
+		queue.Push([]byte(data))
 	}
 }

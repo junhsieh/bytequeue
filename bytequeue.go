@@ -26,7 +26,8 @@ type ByteQueue struct {
 	capacity     int
 	headerBuffer []byte
 
-	enableByteArrDetail      bool // DEBUG: can be removed later.
+	enableClearByte          bool
+	enableByteArrDetail      bool // DEBUG: for testing purpose.
 	enableNumOfPopBytesTrack bool // DEBUG: for testing purpose.
 	numOfPopBytes            int  // DEBUG: for testing purpose.
 	numOfAvailableBytes      int  // DEBUG: for testing purpose.
@@ -50,7 +51,7 @@ func (bq *ByteQueue) getNextHeadV1() {
 		bq.headerBuffer[i] = bq.byteArr[bq.head]
 
 		// DEBUG
-		if bq.enableByteArrDetail == true {
+		if bq.enableClearByte == true {
 			bq.byteArr[bq.head] = 'X' // reset. Can be removed?
 		}
 
@@ -72,7 +73,7 @@ func (bq *ByteQueue) getNextHeadV1() {
 
 	for i := 0; i < dataLen; i++ {
 		// DEBUG
-		if bq.enableByteArrDetail == true {
+		if bq.enableClearByte == true {
 			bq.byteArr[bq.head] = 'X' // reset. Can be removed?
 		}
 
