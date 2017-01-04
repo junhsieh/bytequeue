@@ -25,7 +25,8 @@ type ByteQueue struct {
 	count        int // number of entries
 	capacity     int
 	headerBuffer []byte
-	IsDebug      bool // can be removed later.
+	IsDebug      bool // DEBUG: can be removed later.
+	popBytes     int  // DEBUG: for testing purpose
 }
 
 // NewByteQueue initializes new ByteQueue.
@@ -45,6 +46,8 @@ func (bq *ByteQueue) getNextHeadV1() {
 		bq.byteArr[bq.head] = 'X' // reset. Can be removed?
 		bq.head++
 
+		bq.popBytes++ // DEBUG: for testing purpose
+
 		if bq.head == bq.capacity {
 			bq.head = 0
 		}
@@ -56,6 +59,8 @@ func (bq *ByteQueue) getNextHeadV1() {
 	for i := 0; i < dataLen; i++ {
 		bq.byteArr[bq.head] = 'X' // reset. Can be removed?
 		bq.head++
+
+		bq.popBytes++ // DEBUG: for testing purpose
 
 		if bq.head == bq.capacity {
 			bq.head = 0
@@ -93,6 +98,9 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 		fmt.Printf("========================================")
 		fmt.Printf("========================================\n")
 	}
+
+	// DEBUG: for testing purpose.
+	bq.popBytes = 0
 
 	dataLen := len(data)
 	entryLen := headerEntrySize + dataLen
