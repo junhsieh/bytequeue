@@ -11,7 +11,8 @@ const (
 )
 
 // without X
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYZ"
+//const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYZ"
+const letterBytes = "ABCDEFGHIJKLMNOPQRSTUVWYZ"
 
 func (bq *ByteQueue) debugInitByteArr() {
 	for k, _ := range bq.byteArr {

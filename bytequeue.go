@@ -90,6 +90,12 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	popCount := 0 // DEBUG
 
 	for {
+		fmt.Printf("entryLen: %d; available: %d; head: %d; tail: %d\n",
+			entryLen,
+			bq.availableSpaceAfterTail(),
+			bq.head,
+			bq.tail)
+
 		if entryLen > bq.availableSpaceAfterTail() {
 			// pop some entries until the space is enough
 			// also check do not exceed the size.
@@ -132,10 +138,16 @@ func (bq *ByteQueue) setByteArr(data []byte) {
 }
 
 func (bq *ByteQueue) availableSpaceAfterTail() int {
-	if bq.tail >= bq.head {
+	if bq.tail > bq.head {
 		//return bq.capacity - (bq.tail - bq.head)
 		return bq.capacity - bq.tail + bq.head
+	} else if bq.tail < bq.head {
+		return bq.head - bq.tail
 	}
 
-	return bq.head - bq.tail
+	if bq.head == 0 && bq.tail == 0 {
+		return bq.capacity
+	}
+
+	return 0
 }

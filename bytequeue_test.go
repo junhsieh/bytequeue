@@ -41,13 +41,18 @@ func TestAvailableSpace(t *testing.T) {
 
 	queueSize := 30
 	queue := NewByteQueue(queueSize)
+	queue.IsDebug = true
 	queue.debugInitByteArr()
 
 	var strSize int
 	var str string
 
-	for i := 0; i < 70; i++ {
-		strSize = queue.debugRandInt(0, queueSize-headerEntrySize)
+	for i := 0; i < 20; i++ {
+		fmt.Printf("========================================")
+		fmt.Printf("========================================")
+		fmt.Printf("========================================\n")
+
+		strSize = queue.debugRandInt(0, queueSize-headerEntrySize+1)
 		str = queue.debugRandStringBytes(strSize)
 
 		if _, err := queue.Push([]byte(str)); err != nil {
