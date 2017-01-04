@@ -25,6 +25,7 @@ type ByteQueue struct {
 	count        int // number of entries
 	capacity     int
 	headerBuffer []byte
+	IsDebug      bool // can be removed later.
 }
 
 type queueError struct {
@@ -80,11 +81,17 @@ func (bq *ByteQueue) getNextHead() {
 }
 
 func (bq *ByteQueue) Pop() {
-	fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
-	fmt.Printf("byteArr (befor pop): %02v\n", bq.GetByteArr())
+	if bq.IsDebug == true {
+		fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
+		fmt.Printf("byteArr (befor pop): %02v\n", bq.GetByteArr())
+	}
+
 	bq.getNextHead()
-	fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
-	fmt.Printf("byteArr (after pop): %02v\n", bq.GetByteArr())
+
+	if bq.IsDebug == true {
+		fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
+		fmt.Printf("byteArr (after pop): %02v\n", bq.GetByteArr())
+	}
 }
 
 // Push ...

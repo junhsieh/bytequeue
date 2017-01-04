@@ -7,6 +7,7 @@ import (
 
 func TestDebug(t *testing.T) {
 	queue := NewByteQueue(30)
+	queue.IsDebug = true
 
 	var index int
 	var err error
@@ -26,4 +27,12 @@ func TestDebug(t *testing.T) {
 	fmt.Printf("index: %v\n", index)
 	//fmt.Printf("byteArr (afte push): %v\n", queue.GetByteArr())
 	//t.Errorf("util.JSONDeepEqual(%s, %s) = %v", o.EncodeString(), s1, ok)
+}
+
+func BenchmarkPush(b *testing.B) {
+	queue := NewByteQueue(30)
+
+	for i := 0; i < b.N; i++ {
+		queue.Push([]byte("AAA"))
+	}
 }
