@@ -63,18 +63,20 @@ func (bq *ByteQueue) getNextHeadV1() {
 	}
 }
 
-func (bq *ByteQueue) Pop() {
+func (bq *ByteQueue) Pop(debugEntryLen int) {
 	//if bq.IsDebug == true {
 	//	fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
 	//	fmt.Printf("byteArr (befor pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
 	//}
 
 	bq.getNextHeadV1()
+	bq.count--
 
 	if bq.IsDebug == true {
-		fmt.Printf("Pop:\t\thead: %d\t\ttail: %d\t\tavailable: %d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
+		fmt.Printf("info    (after pop):\t\tentryLen: %d\t\thead: %d\t\ttail: %d\t\tcount: %d\t\tavailable: %d\n", debugEntryLen, bq.head, bq.tail, bq.count, bq.availableSpaceAfterTail())
 		fmt.Printf("                   : %s\n", bq.debugGenByte())
 		fmt.Printf("byteArr (after pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
+		fmt.Printf("\n")
 	}
 }
 
@@ -90,16 +92,16 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	popCount := 0 // DEBUG
 
 	for {
-		fmt.Printf("entryLen: %d; available: %d; head: %d; tail: %d\n",
-			entryLen,
-			bq.availableSpaceAfterTail(),
-			bq.head,
-			bq.tail)
+		//fmt.Printf("entryLen: %d; available: %d; head: %d; tail: %d\n",
+		//	entryLen,
+		//	bq.availableSpaceAfterTail(),
+		//	bq.head,
+		//	bq.tail)
 
 		if entryLen > bq.availableSpaceAfterTail() {
 			// pop some entries until the space is enough
 			// also check do not exceed the size.
-			bq.Pop()
+			bq.Pop(entryLen)
 
 			popCount++
 		} else {
@@ -145,9 +147,9 @@ func (bq *ByteQueue) availableSpaceAfterTail() int {
 		return bq.head - bq.tail
 	}
 
-	if bq.head == 0 && bq.tail == 0 {
+	if bq.count > 0 {
+		return 0
+	} else {
 		return bq.capacity
 	}
-
-	return 0
 }
