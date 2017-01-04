@@ -86,6 +86,7 @@ func (bq *ByteQueue) Pop(debugEntryLen int) {
 }
 
 // Push ...
+// return the index of the pushed data
 func (bq *ByteQueue) Push(data []byte) (int, error) {
 	if bq.IsDebug == true {
 		fmt.Printf("========================================")
@@ -97,8 +98,11 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	entryLen := headerEntrySize + dataLen
 
 	if entryLen > bq.capacity {
-		return 0, errors.New("Entry size is bigger than capacity.")
+		return -1, errors.New("Entry size is bigger than capacity.")
 	}
+
+	// save index before pushing
+	index := bq.tail
 
 	popCount := 0 // DEBUG
 
@@ -136,8 +140,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 		fmt.Printf("byteArr (afte push): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
 	}
 
-	// TODO: what value should be return?
-	return bq.tail, nil
+	return index, nil
 }
 
 func (bq *ByteQueue) setByteArr(data []byte) {
