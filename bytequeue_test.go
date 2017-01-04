@@ -8,7 +8,8 @@ import (
 )
 
 func TestDebug(t *testing.T) {
-	queue := NewByteQueue(30)
+	queueSize := 30
+	queue := NewByteQueue(queueSize)
 	queue.IsDebug = true
 	queue.debugInitByteArr()
 
@@ -16,7 +17,7 @@ func TestDebug(t *testing.T) {
 	var err error
 
 	//str := "AAA"
-	str := "PZrbdBGRzbiBlWKaSuqqgjBYrqPc"
+	str := "PZrbdBGRzbiBlWKaSuqqgjBYrq"
 
 	for i := 0; i < 1; i++ {
 		if index, err = queue.Push([]byte(str)); err != nil {
@@ -43,7 +44,7 @@ func TestAvailableSpace(t *testing.T) {
 	var strSize int
 	var str string
 
-	for i := 0; i < 99999; i++ {
+	for i := 0; i < 100000; i++ {
 		strSize = queue.debugRandInt(0, queueSize-headerEntrySize+1)
 		str = queue.debugRandStringBytes(strSize)
 
@@ -59,9 +60,16 @@ func TestAvailableSpace(t *testing.T) {
 }
 
 func BenchmarkPush(b *testing.B) {
-	queue := NewByteQueue(30)
+	queueSize := 30
+	queue := NewByteQueue(queueSize)
+
+	var strSize int
+	var str string
 
 	for i := 0; i < b.N; i++ {
-		queue.Push([]byte("AAA"))
+		strSize = queue.debugRandInt(0, queueSize-headerEntrySize+1)
+		str = queue.debugRandStringBytes(strSize)
+
+		queue.Push([]byte(str))
 	}
 }
