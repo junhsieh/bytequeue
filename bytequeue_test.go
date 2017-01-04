@@ -49,7 +49,7 @@ func TestAvailableSpace(t *testing.T) {
 	var str string
 	spaceLeft := queue.capacity
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 100000; i++ {
 		strSize = queue.debugRandInt(0, queue.capacity-headerEntrySize+1)
 		str = queue.debugRandStringBytes(strSize)
 
@@ -65,6 +65,10 @@ func TestAvailableSpace(t *testing.T) {
 
 		if queue.availableSpaceAfterTail() != spaceLeft {
 			t.Errorf("spaceLeft %d: %v vs %v; head: %d; tail: %d; count: %d; strSize: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, strSize)
+		}
+
+		if queue.availableSpaceAfterTail() != queue.spaceLeft {
+			t.Errorf("queue.spaceLeft %d: %v vs %v; head: %d; tail: %d; count: %d; strSize: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, strSize)
 		}
 	}
 }

@@ -27,6 +27,7 @@ type ByteQueue struct {
 	headerBuffer []byte
 	IsDebug      bool // DEBUG: can be removed later.
 	popBytes     int  // DEBUG: for testing purpose
+	spaceLeft    int  // Debug: for testing purpose
 }
 
 // NewByteQueue initializes new ByteQueue.
@@ -36,17 +37,19 @@ func NewByteQueue(capacityMB int) *ByteQueue {
 		byteArr:      make([]byte, capacityMB),
 		capacity:     capacityMB,
 		headerBuffer: make([]byte, headerEntrySize),
+		spaceLeft:    capacityMB,
 	}
 }
 
 func (bq *ByteQueue) getNextHeadV1() {
-	// get header
+	// get header for data length
 	for i := 0; i < headerEntrySize; i++ {
 		bq.headerBuffer[i] = bq.byteArr[bq.head]
 		bq.byteArr[bq.head] = 'X' // reset. Can be removed?
 		bq.head++
 
-		bq.popBytes++ // DEBUG: for testing purpose
+		bq.popBytes++  // DEBUG: for testing purpose
+		bq.spaceLeft++ // DEBUG: for testing purpose
 
 		if bq.head == bq.capacity {
 			bq.head = 0
@@ -60,12 +63,16 @@ func (bq *ByteQueue) getNextHeadV1() {
 		bq.byteArr[bq.head] = 'X' // reset. Can be removed?
 		bq.head++
 
-		bq.popBytes++ // DEBUG: for testing purpose
+		bq.popBytes++  // DEBUG: for testing purpose
+		bq.spaceLeft++ // DEBUG: for testing purpose
 
 		if bq.head == bq.capacity {
 			bq.head = 0
 		}
 	}
+}
+
+func (bq *ByteQueue) getNextHeadV2() {
 }
 
 func (bq *ByteQueue) Pop(debugEntryLen int) {
@@ -158,6 +165,8 @@ func (bq *ByteQueue) setByteArr(data []byte) {
 		if bq.tail == bq.capacity {
 			bq.tail = 0
 		}
+
+		bq.spaceLeft-- // DEBUG: for testing purpose
 	}
 }
 
