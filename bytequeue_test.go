@@ -8,6 +8,7 @@ import (
 func TestDebug(t *testing.T) {
 	queue := NewByteQueue(30)
 	queue.IsDebug = true
+	queue.DebugInitByteArr()
 
 	var index int
 	var err error
@@ -28,6 +29,21 @@ func TestDebug(t *testing.T) {
 	fmt.Printf("index: %v\n", index)
 	//fmt.Printf("byteArr (afte push): %v\n", queue.GetByteArr())
 	//t.Errorf("util.JSONDeepEqual(%s, %s) = %v", o.EncodeString(), s1, ok)
+}
+
+func TestAvailableSpace(t *testing.T) {
+	queue := NewByteQueue(30)
+	queue.DebugInitByteArr()
+
+	for i := 0; i < 70000; i++ {
+		if _, err := queue.Push([]byte("AAA")); err != nil {
+			t.Errorf("ERR: queue.Push: %v", err)
+		}
+
+		if queue.DebugCountX() != queue.availableSpaceAfterTail() {
+			t.Errorf("ERR: availableSpaceAfterTail: %v %v", queue.DebugCountX(), queue.availableSpaceAfterTail())
+		}
+	}
 }
 
 func BenchmarkPush(b *testing.B) {

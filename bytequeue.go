@@ -47,6 +47,24 @@ func NewByteQueue(capacityMB int) *ByteQueue {
 	}
 }
 
+func (bq *ByteQueue) DebugInitByteArr() {
+	for k, _ := range bq.byteArr {
+		bq.byteArr[k] = 'X'
+	}
+}
+
+func (bq *ByteQueue) DebugCountX() int {
+	count := 0
+
+	for _, v := range bq.byteArr {
+		if v == 'X' {
+			count++
+		}
+	}
+
+	return count
+}
+
 func (bq *ByteQueue) GetByteArr() []byte {
 	return bq.byteArr
 }
@@ -127,7 +145,6 @@ func (bq *ByteQueue) TmpGenByte() string {
 }
 
 // Push ...
-// return the number of bytes copied
 func (bq *ByteQueue) Push(data []byte) (int, error) {
 	dataLen := len(data)
 	entryLen := headerEntrySize + dataLen
@@ -166,6 +183,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 		fmt.Printf("byteArr (afte push): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
 	}
 
+	// TODO: what value should be return?
 	return bq.tail, nil
 }
 
