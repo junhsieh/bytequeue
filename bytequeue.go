@@ -25,9 +25,11 @@ type ByteQueue struct {
 	count        int // number of entries
 	capacity     int
 	headerBuffer []byte
-	IsDebug      bool // DEBUG: can be removed later.
-	popBytes     int  // DEBUG: for testing purpose
-	spaceLeft    int  // Debug: for testing purpose
+
+	enableByteArrDetail      bool // DEBUG: can be removed later.
+	enableNumOfPopBytesTrack bool // DEBUG: for testing purpose.
+	numOfPopBytes            int  // DEBUG: for testing purpose.
+	numOfAvailableBytes      int  // DEBUG: for testing purpose.
 }
 
 // NewByteQueue initializes new ByteQueue.
@@ -37,7 +39,8 @@ func NewByteQueue(capacityMB int) *ByteQueue {
 		byteArr:      make([]byte, capacityMB),
 		capacity:     capacityMB,
 		headerBuffer: make([]byte, headerEntrySize),
-		spaceLeft:    capacityMB,
+
+		numOfAvailableBytes: capacityMB, // DEBUG: for testing purpose.
 	}
 }
 
@@ -45,11 +48,19 @@ func (bq *ByteQueue) getNextHeadV1() {
 	// get header for data length
 	for i := 0; i < headerEntrySize; i++ {
 		bq.headerBuffer[i] = bq.byteArr[bq.head]
-		bq.byteArr[bq.head] = 'X' // reset. Can be removed?
+
+		// DEBUG
+		if bq.enableByteArrDetail == true {
+			bq.byteArr[bq.head] = 'X' // reset. Can be removed?
+		}
+
 		bq.head++
 
-		bq.popBytes++  // DEBUG: for testing purpose
-		bq.spaceLeft++ // DEBUG: for testing purpose
+		// DEBUG
+		if bq.enableNumOfPopBytesTrack == true {
+			bq.numOfPopBytes++       // DEBUG: for testing purpose.
+			bq.numOfAvailableBytes++ // DEBUG: for testing purpose.
+		}
 
 		if bq.head == bq.capacity {
 			bq.head = 0
@@ -60,11 +71,18 @@ func (bq *ByteQueue) getNextHeadV1() {
 	dataLen := int(binary.BigEndian.Uint32(bq.headerBuffer))
 
 	for i := 0; i < dataLen; i++ {
-		bq.byteArr[bq.head] = 'X' // reset. Can be removed?
+		// DEBUG
+		if bq.enableByteArrDetail == true {
+			bq.byteArr[bq.head] = 'X' // reset. Can be removed?
+		}
+
 		bq.head++
 
-		bq.popBytes++  // DEBUG: for testing purpose
-		bq.spaceLeft++ // DEBUG: for testing purpose
+		// DEBUG
+		if bq.enableNumOfPopBytesTrack == true {
+			bq.numOfPopBytes++       // DEBUG: for testing purpose
+			bq.numOfAvailableBytes++ // DEBUG: for testing purpose
+		}
 
 		if bq.head == bq.capacity {
 			bq.head = 0
@@ -72,11 +90,8 @@ func (bq *ByteQueue) getNextHeadV1() {
 	}
 }
 
-func (bq *ByteQueue) getNextHeadV2() {
-}
-
 func (bq *ByteQueue) Pop(debugEntryLen int) {
-	//if bq.IsDebug == true {
+	//if bq.enableByteArrDetail == true {
 	//	fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
 	//	fmt.Printf("byteArr (befor pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
 	//}
@@ -84,7 +99,8 @@ func (bq *ByteQueue) Pop(debugEntryLen int) {
 	bq.getNextHeadV1()
 	bq.count--
 
-	if bq.IsDebug == true {
+	// DEBUG
+	if bq.enableByteArrDetail == true {
 		fmt.Printf("info    (after pop):\t\tentryLen: %d\t\thead: %d\t\ttail: %d\t\tcount: %d\t\tavailable: %d\n",
 			debugEntryLen,
 			bq.head,
@@ -100,14 +116,17 @@ func (bq *ByteQueue) Pop(debugEntryLen int) {
 // Push ...
 // return the index of the pushed data
 func (bq *ByteQueue) Push(data []byte) (int, error) {
-	if bq.IsDebug == true {
+	// DEBUG
+	if bq.enableByteArrDetail == true {
 		fmt.Printf("========================================")
 		fmt.Printf("========================================")
 		fmt.Printf("========================================\n")
 	}
 
 	// DEBUG: for testing purpose.
-	bq.popBytes = 0
+	if bq.enableNumOfPopBytesTrack == true {
+		bq.numOfPopBytes = 0
+	}
 
 	dataLen := len(data)
 	entryLen := headerEntrySize + dataLen
@@ -119,7 +138,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	// save index before pushing
 	index := bq.tail
 
-	popCount := 0 // DEBUG
+	//popCount := 0 // DEBUG
 
 	for {
 		//fmt.Printf("entryLen: %d; available: %d; head: %d; tail: %d\n",
@@ -133,7 +152,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 			// also check do not exceed the size.
 			bq.Pop(entryLen)
 
-			popCount++
+			//popCount++
 		} else {
 			//fmt.Printf("There are %d pops\n", popCount)
 			break
@@ -151,7 +170,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	//
 	bq.count++
 
-	if bq.IsDebug == true {
+	if bq.enableByteArrDetail == true {
 		fmt.Printf("byteArr (afte push): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
 	}
 
@@ -166,7 +185,10 @@ func (bq *ByteQueue) setByteArr(data []byte) {
 			bq.tail = 0
 		}
 
-		bq.spaceLeft-- // DEBUG: for testing purpose
+		// DEBUG
+		if bq.enableNumOfPopBytesTrack == true {
+			bq.numOfAvailableBytes-- // DEBUG: for testing purpose
+		}
 	}
 }
 
