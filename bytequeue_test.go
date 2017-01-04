@@ -13,12 +13,12 @@ func TestDebug(t *testing.T) {
 	var err error
 
 	for i := 0; i < 6; i++ {
-		fmt.Printf("==================================\n")
+		fmt.Printf("========================================")
+		fmt.Printf("========================================")
+		fmt.Printf("========================================\n")
 
 		if index, err = queue.Push([]byte("AAA")); err != nil {
 			fmt.Printf("err: %v\n", err)
-		} else {
-			fmt.Printf("byteArr (afte push): %02v\n", queue.GetByteArr())
 		}
 	}
 

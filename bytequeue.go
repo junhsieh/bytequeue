@@ -13,6 +13,11 @@ const (
 )
 
 const (
+	ColorBegin = "\033["
+	ColorEnd   = "\033[0m"
+)
+
+const (
 	// Number of bytes used to keep the entry size information in the header.
 	headerEntrySize = 4
 )
@@ -49,15 +54,34 @@ func (bq *ByteQueue) GetByteArr() []byte {
 func (bq *ByteQueue) GetHead() int {
 	return bq.head
 }
+
 func (bq *ByteQueue) GetTail() int {
 	return bq.tail
 }
 
-func (bq *ByteQueue) getNextHead() {
+func (bq *ByteQueue) highlightByteArr(data []byte) string {
+	str := "["
+
+	for k, v := range data {
+		if k == bq.head {
+			str += ColorBegin + "31m" + fmt.Sprintf("%02v", v) + ColorEnd + " "
+		} else if k == bq.tail {
+			str += ColorBegin + "35m" + fmt.Sprintf("%02v", v) + ColorEnd + " "
+		} else if v == 'X' {
+			str += ColorBegin + "32m" + fmt.Sprintf("%02v", v) + ColorEnd + " "
+		} else {
+			str += fmt.Sprintf("%02v", v) + " "
+		}
+	}
+
+	return str + "]"
+}
+
+func (bq *ByteQueue) getNextHeadV1() {
 	// get header
 	for i := 0; i < headerEntrySize; i++ {
 		bq.headerBuffer[i] = bq.byteArr[bq.head]
-		bq.byteArr[bq.head] = 'X'
+		bq.byteArr[bq.head] = 'X' // reset. Can be removed?
 		bq.head++
 
 		if bq.head == bq.capacity {
@@ -69,28 +93,26 @@ func (bq *ByteQueue) getNextHead() {
 	dataLen := int(binary.BigEndian.Uint32(bq.headerBuffer))
 
 	for i := 0; i < dataLen; i++ {
-		bq.byteArr[bq.head] = 'X'
+		bq.byteArr[bq.head] = 'X' // reset. Can be removed?
 		bq.head++
 
 		if bq.head == bq.capacity {
 			bq.head = 0
 		}
 	}
-	//bq.head += dataLen
-	//return bq.head
 }
 
 func (bq *ByteQueue) Pop() {
 	if bq.IsDebug == true {
 		fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
-		fmt.Printf("byteArr (befor pop): %02v\n", bq.GetByteArr())
+		fmt.Printf("byteArr (befor pop): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
 	}
 
-	bq.getNextHead()
+	bq.getNextHeadV1()
 
 	if bq.IsDebug == true {
 		fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
-		fmt.Printf("byteArr (after pop): %02v\n", bq.GetByteArr())
+		fmt.Printf("byteArr (after pop): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
 	}
 }
 
@@ -104,7 +126,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 		return 0, errors.New("Entry size is bigger than capacity.")
 	}
 
-	popCount := 0
+	popCount := 0 // DEBUG
 
 	for {
 		if entryLen > bq.availableSpaceAfterTail() {
@@ -130,6 +152,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	//
 	bq.count++
 
+	fmt.Printf("byteArr (afte push): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
 	return bq.tail, nil
 }
 
