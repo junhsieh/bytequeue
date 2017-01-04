@@ -152,7 +152,10 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	//
 	bq.count++
 
-	fmt.Printf("byteArr (afte push): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
+	if bq.IsDebug == true {
+		fmt.Printf("byteArr (afte push): %02v\n", bq.highlightByteArr(bq.GetByteArr()))
+	}
+
 	return bq.tail, nil
 }
 
