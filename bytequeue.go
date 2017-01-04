@@ -45,8 +45,12 @@ func NewByteQueue(capacityMB int) *ByteQueue {
 	}
 }
 
-func (bq *ByteQueue) getNextHeadV1() {
-	// get header for data length
+func (bq *ByteQueue) Pop() ([]byte, error) {
+	if bq.count == 0 {
+		return nil, errors.New("Empty queue")
+	}
+
+	// get the header of the oldest entry.
 	for i := 0; i < headerEntrySize; i++ {
 		bq.headerBuffer[i] = bq.byteArr[bq.head]
 
@@ -68,10 +72,13 @@ func (bq *ByteQueue) getNextHeadV1() {
 		}
 	}
 
-	// data
+	// reset data bytes of the oldest entry and move head to the next entry.
 	dataLen := int(binary.BigEndian.Uint32(bq.headerBuffer))
+	data := make([]byte, headerEntrySize+dataLen)
 
 	for i := 0; i < dataLen; i++ {
+		data[i] = bq.byteArr[bq.head]
+
 		// DEBUG
 		if bq.enableClearByte == true {
 			bq.byteArr[bq.head] = 'X' // reset. Can be removed?
@@ -89,29 +96,11 @@ func (bq *ByteQueue) getNextHeadV1() {
 			bq.head = 0
 		}
 	}
-}
 
-func (bq *ByteQueue) Pop(debugEntryLen int) {
-	//if bq.enableByteArrDetail == true {
-	//	fmt.Printf("Pop: h:%d\tt:%d\ta:%d\n", bq.head, bq.tail, bq.availableSpaceAfterTail())
-	//	fmt.Printf("byteArr (befor pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
-	//}
-
-	bq.getNextHeadV1()
+	//
 	bq.count--
 
-	// DEBUG
-	if bq.enableByteArrDetail == true {
-		fmt.Printf("info    (after pop):\t\tentryLen: %d\t\thead: %d\t\ttail: %d\t\tcount: %d\t\tavailable: %d\n",
-			debugEntryLen,
-			bq.head,
-			bq.tail,
-			bq.count,
-			bq.availableSpaceAfterTail())
-		fmt.Printf("                   : %s\n", bq.debugGenByte())
-		fmt.Printf("byteArr (after pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
-		fmt.Printf("\n")
-	}
+	return data, nil
 }
 
 // Push ...
@@ -140,16 +129,23 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	index := bq.tail
 
 	for {
-		//fmt.Printf("entryLen: %d; available: %d; head: %d; tail: %d\n",
-		//	entryLen,
-		//	bq.availableSpaceAfterTail(),
-		//	bq.head,
-		//	bq.tail)
-
 		if entryLen > bq.availableSpaceAfterTail() {
-			// pop some entries until the space is enough
-			// also check do not exceed the size.
-			bq.Pop(entryLen)
+			if _, err := bq.Pop(); err != nil {
+				return -1, err
+			}
+
+			// DEBUG
+			if bq.enableByteArrDetail == true {
+				fmt.Printf("info    (after pop):\t\tentryLen: %d\t\thead: %d\t\ttail: %d\t\tcount: %d\t\tavailable: %d\n",
+					entryLen,
+					bq.head,
+					bq.tail,
+					bq.count,
+					bq.availableSpaceAfterTail())
+				fmt.Printf("                   : %s\n", bq.debugGenByte())
+				fmt.Printf("byteArr (after pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
+				fmt.Printf("\n")
+			}
 		} else {
 			break
 		}
