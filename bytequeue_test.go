@@ -42,7 +42,7 @@ func TestDebug(t *testing.T) {
 	//t.Errorf("util.JSONDeepEqual(%s, %s) = %v", o.EncodeString(), s1, ok)
 }
 
-func TestAvailableSpace(t *testing.T) {
+func TestHeadTailAvailableSpace(t *testing.T) {
 	//rand.Seed(time.Now().UTC().UnixNano())
 
 	queueSize := 30

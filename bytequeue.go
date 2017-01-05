@@ -27,7 +27,7 @@ type ByteQueue struct {
 	capacity     int
 	headerBuffer []byte
 
-	enableClearByte          bool
+	enableClearByte          bool // DEBUG: for testing purpose.
 	enableByteArrDetail      bool // DEBUG: for testing purpose.
 	enableNumOfPopBytesTrack bool // DEBUG: for testing purpose.
 	numOfPopBytes            int  // DEBUG: for testing purpose.
