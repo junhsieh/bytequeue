@@ -201,6 +201,7 @@ func (cq *CircularQueue) Push(data []byte) (int, error) {
 	//
 	cq.numOfEntries++
 
+	// DEBUG
 	if cq.enableByteArrDetail == true {
 		fmt.Printf("byteArr (afte push): %02v\n", cq.debugHighlightByteArr(cq.byteArr))
 	}
