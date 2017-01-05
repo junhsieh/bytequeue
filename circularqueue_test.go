@@ -1,4 +1,4 @@
-package bytequeue
+package circularqueue
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ func init() {
 
 func TestDebug(t *testing.T) {
 	queueSize := 30
-	queue := NewByteQueue(queueSize)
+	queue := NewCircularQueue(queueSize)
 	//queue.enableByteArrDetail = true
 	queue.debugInitByteArr()
 
@@ -46,7 +46,7 @@ func TestHeadTailAvailableSpace(t *testing.T) {
 	//rand.Seed(time.Now().UTC().UnixNano())
 
 	queueSize := 30
-	queue := NewByteQueue(queueSize)
+	queue := NewCircularQueue(queueSize)
 	queue.enableClearByte = true
 	//queue.enableByteArrDetail = true
 	queue.enableNumOfPopBytesTrack = true
@@ -114,7 +114,7 @@ func TestHeadTailAvailableSpace(t *testing.T) {
 
 func BenchmarkPush(b *testing.B) {
 	queueSize := 30
-	queue := NewByteQueue(queueSize)
+	queue := NewCircularQueue(queueSize)
 
 	var dataLen int
 	var data string
@@ -129,7 +129,7 @@ func BenchmarkPush(b *testing.B) {
 
 func BenchmarkPush2(b *testing.B) {
 	queueSize := 30
-	queue := NewByteQueue(queueSize)
+	queue := NewCircularQueue(queueSize)
 	queue.enablePopWithoutData = true
 
 	var dataLen int
@@ -145,7 +145,7 @@ func BenchmarkPush2(b *testing.B) {
 
 func BenchmarkPush3(b *testing.B) {
 	queueSize := 3000
-	queue := NewByteQueue(queueSize)
+	queue := NewCircularQueue(queueSize)
 	queue.enablePopWithoutData = true
 
 	var dataLen int
@@ -162,7 +162,7 @@ func BenchmarkPush3(b *testing.B) {
 
 func BenchmarkPush4(b *testing.B) {
 	queueSize := 30000
-	queue := NewByteQueue(queueSize)
+	queue := NewCircularQueue(queueSize)
 	queue.enablePopWithoutData = true
 
 	var dataLen int
@@ -179,7 +179,7 @@ func BenchmarkPush4(b *testing.B) {
 
 func BenchmarkPush5(b *testing.B) {
 	queueSize := 300000
-	queue := NewByteQueue(queueSize)
+	queue := NewCircularQueue(queueSize)
 	queue.enablePopWithoutData = true
 
 	var dataLen int

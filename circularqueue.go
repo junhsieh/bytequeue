@@ -1,4 +1,4 @@
-package bytequeue
+package circularqueue
 
 import (
 	"encoding/binary"
@@ -18,8 +18,8 @@ const (
 	headerEntrySize = 4
 )
 
-// ByteQueue is a non-thread safe queue.
-type ByteQueue struct {
+// CircularQueue is a non-thread safe queue.
+type CircularQueue struct {
 	byteArr      []byte
 	head         int
 	tail         int
@@ -35,10 +35,10 @@ type ByteQueue struct {
 	numOfAvailableBytes      int  // DEBUG: for testing purpose.
 }
 
-// NewByteQueue initializes new ByteQueue.
+// NewCircularQueue initializes new CircularQueue.
 // capacity: in MB.
-func NewByteQueue(capacityMB int) *ByteQueue {
-	return &ByteQueue{
+func NewCircularQueue(capacityMB int) *CircularQueue {
+	return &CircularQueue{
 		byteArr:      make([]byte, capacityMB),
 		capacity:     capacityMB,
 		headerBuffer: make([]byte, headerEntrySize),
@@ -47,142 +47,142 @@ func NewByteQueue(capacityMB int) *ByteQueue {
 	}
 }
 
-func (bq *ByteQueue) Pop() ([]byte, error) {
-	if bq.numOfEntries == 0 {
+func (cq *CircularQueue) Pop() ([]byte, error) {
+	if cq.numOfEntries == 0 {
 		return nil, errors.New("Empty queue")
 	}
 
 	// get the header of the oldest entry.
 	for i := 0; i < headerEntrySize; i++ {
-		bq.headerBuffer[i] = bq.byteArr[bq.head]
+		cq.headerBuffer[i] = cq.byteArr[cq.head]
 
 		// DEBUG
-		if bq.enableClearByte == true {
-			bq.byteArr[bq.head] = 'X' // reset. Can be removed?
+		if cq.enableClearByte == true {
+			cq.byteArr[cq.head] = 'X' // reset. Can be removed?
 		}
 
-		bq.head++
+		cq.head++
 
-		if bq.head == bq.capacity {
-			bq.head = 0
+		if cq.head == cq.capacity {
+			cq.head = 0
 		}
 
 		// DEBUG
-		if bq.enableNumOfPopBytesTrack == true {
-			bq.numOfPopBytes++       // DEBUG: for testing purpose.
-			bq.numOfAvailableBytes++ // DEBUG: for testing purpose.
+		if cq.enableNumOfPopBytesTrack == true {
+			cq.numOfPopBytes++       // DEBUG: for testing purpose.
+			cq.numOfAvailableBytes++ // DEBUG: for testing purpose.
 		}
 	}
 
 	// reset data bytes of the oldest entry and move head to the next entry.
-	dataLen := int(binary.BigEndian.Uint32(bq.headerBuffer))
+	dataLen := int(binary.BigEndian.Uint32(cq.headerBuffer))
 	data := make([]byte, headerEntrySize+dataLen)
 
 	for i := 0; i < dataLen; i++ {
-		data[i] = bq.byteArr[bq.head]
+		data[i] = cq.byteArr[cq.head]
 
 		// DEBUG
-		if bq.enableClearByte == true {
-			bq.byteArr[bq.head] = 'X' // reset. Can be removed?
+		if cq.enableClearByte == true {
+			cq.byteArr[cq.head] = 'X' // reset. Can be removed?
 		}
 
-		bq.head++
+		cq.head++
 
-		if bq.head == bq.capacity {
-			bq.head = 0
+		if cq.head == cq.capacity {
+			cq.head = 0
 		}
 
 		// DEBUG
-		if bq.enableNumOfPopBytesTrack == true {
-			bq.numOfPopBytes++       // DEBUG: for testing purpose
-			bq.numOfAvailableBytes++ // DEBUG: for testing purpose
+		if cq.enableNumOfPopBytesTrack == true {
+			cq.numOfPopBytes++       // DEBUG: for testing purpose
+			cq.numOfAvailableBytes++ // DEBUG: for testing purpose
 		}
 	}
 
 	//
-	bq.numOfEntries--
+	cq.numOfEntries--
 
 	return data, nil
 }
 
-func (bq *ByteQueue) PopWithoutData() {
-	if bq.numOfEntries == 0 {
+func (cq *CircularQueue) PopWithoutData() {
+	if cq.numOfEntries == 0 {
 		return
 	}
 
 	// get the header of the oldest entry.
 	for i := 0; i < headerEntrySize; i++ {
-		bq.headerBuffer[i] = bq.byteArr[bq.head]
-		bq.head++
+		cq.headerBuffer[i] = cq.byteArr[cq.head]
+		cq.head++
 
-		if bq.head == bq.capacity {
-			bq.head = 0
+		if cq.head == cq.capacity {
+			cq.head = 0
 		}
 
 		// DEBUG
-		if bq.enableNumOfPopBytesTrack == true {
-			bq.numOfPopBytes++       // DEBUG: for testing purpose
-			bq.numOfAvailableBytes++ // DEBUG: for testing purpose
+		if cq.enableNumOfPopBytesTrack == true {
+			cq.numOfPopBytes++       // DEBUG: for testing purpose
+			cq.numOfAvailableBytes++ // DEBUG: for testing purpose
 		}
 	}
 
 	// reset data bytes of the oldest entry and move head to the next entry.
-	dataLen := int(binary.BigEndian.Uint32(bq.headerBuffer))
-	bq.head = bq.head + dataLen
+	dataLen := int(binary.BigEndian.Uint32(cq.headerBuffer))
+	cq.head = cq.head + dataLen
 
-	if bq.head >= bq.capacity {
-		bq.head = bq.head - bq.capacity
+	if cq.head >= cq.capacity {
+		cq.head = cq.head - cq.capacity
 	}
 
 	// DEBUG
-	if bq.enableNumOfPopBytesTrack == true {
-		bq.numOfPopBytes += dataLen       // DEBUG: for testing purpose
-		bq.numOfAvailableBytes += dataLen // DEBUG: for testing purpose
+	if cq.enableNumOfPopBytesTrack == true {
+		cq.numOfPopBytes += dataLen       // DEBUG: for testing purpose
+		cq.numOfAvailableBytes += dataLen // DEBUG: for testing purpose
 	}
 
 	//
-	bq.numOfEntries--
+	cq.numOfEntries--
 }
 
 // Push ...
 // return the index of the pushed data
-func (bq *ByteQueue) Push(data []byte) (int, error) {
+func (cq *CircularQueue) Push(data []byte) (int, error) {
 	// DEBUG
-	if bq.enableByteArrDetail == true {
+	if cq.enableByteArrDetail == true {
 		fmt.Printf(strings.Repeat("=", 130) + "\n")
 	}
 
 	// DEBUG: for testing purpose.
-	if bq.enableNumOfPopBytesTrack == true {
-		bq.numOfPopBytes = 0
+	if cq.enableNumOfPopBytesTrack == true {
+		cq.numOfPopBytes = 0
 	}
 
 	dataLen := len(data)
 	entryLen := headerEntrySize + dataLen
 
-	if entryLen > bq.capacity {
+	if entryLen > cq.capacity {
 		return -1, errors.New("Entry size is bigger than capacity.")
 	}
 
 	// Save index for later use before pushing
-	index := bq.tail
+	index := cq.tail
 
 	for {
-		if entryLen > bq.availableSpaceAfterTail() {
-			if bq.enablePopWithoutData == false {
-				if _, err := bq.Pop(); err != nil {
+		if entryLen > cq.availableSpaceAfterTail() {
+			if cq.enablePopWithoutData == false {
+				if _, err := cq.Pop(); err != nil {
 					return -1, err
 				}
 			} else {
-				bq.PopWithoutData()
+				cq.PopWithoutData()
 			}
 
 			// DEBUG
-			if bq.enableByteArrDetail == true {
+			if cq.enableByteArrDetail == true {
 				fmt.Printf("info    (after pop):\t\tentryLen: %d\t\thead: %d\t\ttail: %d\t\tnumOfEntries: %d\t\tavailable: %d\n",
-					entryLen, bq.head, bq.tail, bq.numOfEntries, bq.availableSpaceAfterTail())
-				fmt.Printf("                   : %s\n", bq.debugGenByte())
-				fmt.Printf("byteArr (after pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
+					entryLen, cq.head, cq.tail, cq.numOfEntries, cq.availableSpaceAfterTail())
+				fmt.Printf("                   : %s\n", cq.debugGenByte())
+				fmt.Printf("byteArr (after pop): %02v\n", cq.debugHighlightByteArr(cq.byteArr))
 				fmt.Printf("\n")
 			}
 		} else {
@@ -191,50 +191,50 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	}
 
 	// copy header
-	binary.BigEndian.PutUint32(bq.headerBuffer, uint32(dataLen))
+	binary.BigEndian.PutUint32(cq.headerBuffer, uint32(dataLen))
 
-	bq.setByteArr(bq.headerBuffer)
+	cq.setByteArr(cq.headerBuffer)
 
 	// copy data
-	bq.setByteArr(data)
+	cq.setByteArr(data)
 
 	//
-	bq.numOfEntries++
+	cq.numOfEntries++
 
-	if bq.enableByteArrDetail == true {
-		fmt.Printf("byteArr (afte push): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
+	if cq.enableByteArrDetail == true {
+		fmt.Printf("byteArr (afte push): %02v\n", cq.debugHighlightByteArr(cq.byteArr))
 	}
 
 	return index, nil
 }
 
-func (bq *ByteQueue) setByteArr(data []byte) {
+func (cq *CircularQueue) setByteArr(data []byte) {
 	for _, v := range data {
-		bq.byteArr[bq.tail] = v
-		bq.tail++
+		cq.byteArr[cq.tail] = v
+		cq.tail++
 
-		if bq.tail == bq.capacity {
-			bq.tail = 0
+		if cq.tail == cq.capacity {
+			cq.tail = 0
 		}
 
 		// DEBUG
-		if bq.enableNumOfPopBytesTrack == true {
-			bq.numOfAvailableBytes-- // DEBUG: for testing purpose
+		if cq.enableNumOfPopBytesTrack == true {
+			cq.numOfAvailableBytes-- // DEBUG: for testing purpose
 		}
 	}
 }
 
-func (bq *ByteQueue) availableSpaceAfterTail() int {
-	if bq.tail > bq.head {
-		//return bq.capacity - (bq.tail - bq.head)
-		return bq.capacity - bq.tail + bq.head
-	} else if bq.tail < bq.head {
-		return bq.head - bq.tail
+func (cq *CircularQueue) availableSpaceAfterTail() int {
+	if cq.tail > cq.head {
+		//return cq.capacity - (cq.tail - cq.head)
+		return cq.capacity - cq.tail + cq.head
+	} else if cq.tail < cq.head {
+		return cq.head - cq.tail
 	}
 
-	if bq.numOfEntries > 0 {
+	if cq.numOfEntries > 0 {
 		return 0
 	} else {
-		return bq.capacity
+		return cq.capacity
 	}
 }

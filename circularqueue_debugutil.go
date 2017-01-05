@@ -1,4 +1,4 @@
-package bytequeue
+package circularqueue
 
 import (
 	"fmt"
@@ -14,16 +14,16 @@ const (
 //const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYZ"
 const letterBytes = "ABCDEFGHIJKLMNOPQRSTUVWYZ"
 
-func (bq *ByteQueue) debugInitByteArr() {
-	for k, _ := range bq.byteArr {
-		bq.byteArr[k] = 'X'
+func (cq *CircularQueue) debugInitByteArr() {
+	for k, _ := range cq.byteArr {
+		cq.byteArr[k] = 'X'
 	}
 }
 
-func (bq *ByteQueue) debugCountX() int {
+func (cq *CircularQueue) debugCountX() int {
 	count := 0
 
-	for _, v := range bq.byteArr {
+	for _, v := range cq.byteArr {
 		if v == 'X' {
 			count++
 		}
@@ -32,13 +32,13 @@ func (bq *ByteQueue) debugCountX() int {
 	return count
 }
 
-func (bq *ByteQueue) debugHighlightByteArr(data []byte) string {
+func (cq *CircularQueue) debugHighlightByteArr(data []byte) string {
 	str := "["
 
 	for k, v := range data {
-		if k == bq.head {
+		if k == cq.head {
 			str += ColorBegin + "31m" + fmt.Sprintf("%02v", v) + ColorEnd + " "
-		} else if k == bq.tail {
+		} else if k == cq.tail {
 			str += ColorBegin + "35m" + fmt.Sprintf("%02v", v) + ColorEnd + " "
 		} else if v == 'X' {
 			str += ColorBegin + "32m" + fmt.Sprintf("%02v", v) + ColorEnd + " "
@@ -50,16 +50,16 @@ func (bq *ByteQueue) debugHighlightByteArr(data []byte) string {
 	return str + "]"
 }
 
-func (bq *ByteQueue) debugGenByte() string {
+func (cq *CircularQueue) debugGenByte() string {
 	str := "("
 
-	for i := 0; i < bq.capacity; i++ {
+	for i := 0; i < cq.capacity; i++ {
 		str += fmt.Sprintf("%02d ", i)
 	}
 	return str + ")"
 }
 
-func (bq *ByteQueue) debugRandStringBytes(n int) string {
+func (cq *CircularQueue) debugRandStringBytes(n int) string {
 	b := make([]byte, n)
 	for i := range b {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
@@ -67,6 +67,6 @@ func (bq *ByteQueue) debugRandStringBytes(n int) string {
 	return string(b)
 }
 
-func (bq *ByteQueue) debugRandInt(min int, max int) int {
+func (cq *CircularQueue) debugRandInt(min int, max int) int {
 	return min + rand.Intn(max-min)
 }
