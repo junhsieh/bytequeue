@@ -59,7 +59,11 @@ func TestHeadTailAvailableSpace(t *testing.T) {
 	checkTail := 0
 	checkSpaceLeft := queue.capacity
 
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 200000; i++ {
+		if i == 100000 {
+			queue.enablePopWithoutData = true
+		}
+
 		dataLen = queue.debugRandInt(0, queue.capacity-headerEntrySize+1)
 		data = queue.debugRandStringBytes(dataLen)
 
@@ -92,8 +96,10 @@ func TestHeadTailAvailableSpace(t *testing.T) {
 		// check available space
 		checkSpaceLeft = checkSpaceLeft - headerEntrySize - dataLen + queue.numOfPopBytes
 
-		if queue.availableSpaceAfterTail() != queue.debugCountX() {
-			t.Errorf("queue.debugCountX() %d: %v vs %v; head: %d; tail: %d; numOfEntries: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.numOfEntries, dataLen)
+		if queue.enablePopWithoutData == false {
+			if queue.availableSpaceAfterTail() != queue.debugCountX() {
+				t.Errorf("queue.debugCountX() %d: %v vs %v; head: %d; tail: %d; numOfEntries: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.numOfEntries, dataLen)
+			}
 		}
 
 		if queue.availableSpaceAfterTail() != checkSpaceLeft {
@@ -115,6 +121,73 @@ func BenchmarkPush(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		dataLen = queue.debugRandInt(0, queueSize-headerEntrySize+1)
+		data = queue.debugRandStringBytes(dataLen)
+
+		queue.Push([]byte(data))
+	}
+}
+
+func BenchmarkPush2(b *testing.B) {
+	queueSize := 30
+	queue := NewByteQueue(queueSize)
+	queue.enablePopWithoutData = true
+
+	var dataLen int
+	var data string
+
+	for i := 0; i < b.N; i++ {
+		dataLen = queue.debugRandInt(0, queueSize-headerEntrySize+1)
+		data = queue.debugRandStringBytes(dataLen)
+
+		queue.Push([]byte(data))
+	}
+}
+
+func BenchmarkPush3(b *testing.B) {
+	queueSize := 3000
+	queue := NewByteQueue(queueSize)
+	queue.enablePopWithoutData = true
+
+	var dataLen int
+	var data string
+
+	for i := 0; i < b.N; i++ {
+		//dataLen = queue.debugRandInt(0, queueSize-headerEntrySize+1)
+		dataLen = queue.debugRandInt(0, 1024)
+		data = queue.debugRandStringBytes(dataLen)
+
+		queue.Push([]byte(data))
+	}
+}
+
+func BenchmarkPush4(b *testing.B) {
+	queueSize := 30000
+	queue := NewByteQueue(queueSize)
+	queue.enablePopWithoutData = true
+
+	var dataLen int
+	var data string
+
+	for i := 0; i < b.N; i++ {
+		//dataLen = queue.debugRandInt(0, queueSize-headerEntrySize+1)
+		dataLen = queue.debugRandInt(0, 1024)
+		data = queue.debugRandStringBytes(dataLen)
+
+		queue.Push([]byte(data))
+	}
+}
+
+func BenchmarkPush5(b *testing.B) {
+	queueSize := 300000
+	queue := NewByteQueue(queueSize)
+	queue.enablePopWithoutData = true
+
+	var dataLen int
+	var data string
+
+	for i := 0; i < b.N; i++ {
+		//dataLen = queue.debugRandInt(0, queueSize-headerEntrySize+1)
+		dataLen = queue.debugRandInt(0, 1024)
 		data = queue.debugRandStringBytes(dataLen)
 
 		queue.Push([]byte(data))

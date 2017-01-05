@@ -30,6 +30,7 @@ type ByteQueue struct {
 	enableClearByte          bool // DEBUG: for testing purpose.
 	enableByteArrDetail      bool // DEBUG: for testing purpose.
 	enableNumOfPopBytesTrack bool // DEBUG: for testing purpose.
+	enablePopWithoutData     bool // DEBUG: for testing purpose.
 	numOfPopBytes            int  // DEBUG: for testing purpose.
 	numOfAvailableBytes      int  // DEBUG: for testing purpose.
 }
@@ -62,14 +63,14 @@ func (bq *ByteQueue) Pop() ([]byte, error) {
 
 		bq.head++
 
+		if bq.head == bq.capacity {
+			bq.head = 0
+		}
+
 		// DEBUG
 		if bq.enableNumOfPopBytesTrack == true {
 			bq.numOfPopBytes++       // DEBUG: for testing purpose.
 			bq.numOfAvailableBytes++ // DEBUG: for testing purpose.
-		}
-
-		if bq.head == bq.capacity {
-			bq.head = 0
 		}
 	}
 
@@ -87,14 +88,14 @@ func (bq *ByteQueue) Pop() ([]byte, error) {
 
 		bq.head++
 
+		if bq.head == bq.capacity {
+			bq.head = 0
+		}
+
 		// DEBUG
 		if bq.enableNumOfPopBytesTrack == true {
 			bq.numOfPopBytes++       // DEBUG: for testing purpose
 			bq.numOfAvailableBytes++ // DEBUG: for testing purpose
-		}
-
-		if bq.head == bq.capacity {
-			bq.head = 0
 		}
 	}
 
@@ -102,6 +103,45 @@ func (bq *ByteQueue) Pop() ([]byte, error) {
 	bq.numOfEntries--
 
 	return data, nil
+}
+
+func (bq *ByteQueue) PopWithoutData() {
+	if bq.numOfEntries == 0 {
+		return
+	}
+
+	// get the header of the oldest entry.
+	for i := 0; i < headerEntrySize; i++ {
+		bq.headerBuffer[i] = bq.byteArr[bq.head]
+		bq.head++
+
+		if bq.head == bq.capacity {
+			bq.head = 0
+		}
+
+		// DEBUG
+		if bq.enableNumOfPopBytesTrack == true {
+			bq.numOfPopBytes++       // DEBUG: for testing purpose
+			bq.numOfAvailableBytes++ // DEBUG: for testing purpose
+		}
+	}
+
+	// reset data bytes of the oldest entry and move head to the next entry.
+	dataLen := int(binary.BigEndian.Uint32(bq.headerBuffer))
+	bq.head = bq.head + dataLen
+
+	if bq.head >= bq.capacity {
+		bq.head = bq.head - bq.capacity
+	}
+
+	// DEBUG
+	if bq.enableNumOfPopBytesTrack == true {
+		bq.numOfPopBytes += dataLen       // DEBUG: for testing purpose
+		bq.numOfAvailableBytes += dataLen // DEBUG: for testing purpose
+	}
+
+	//
+	bq.numOfEntries--
 }
 
 // Push ...
@@ -124,13 +164,17 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 		return -1, errors.New("Entry size is bigger than capacity.")
 	}
 
-	// save index for later use before pushing
+	// Save index for later use before pushing
 	index := bq.tail
 
 	for {
 		if entryLen > bq.availableSpaceAfterTail() {
-			if _, err := bq.Pop(); err != nil {
-				return -1, err
+			if bq.enablePopWithoutData == false {
+				if _, err := bq.Pop(); err != nil {
+					return -1, err
+				}
+			} else {
+				bq.PopWithoutData()
 			}
 
 			// DEBUG
