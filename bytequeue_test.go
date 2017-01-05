@@ -8,6 +8,11 @@ import (
 )
 
 func init() {
+	// NOTE: As for all random libraries, you have to set the seed only once, for example when initializing your program
+	// unless you specifically need to reproduce a given sequence (which is usually done for debugging).
+	// Reference:
+	// http://stackoverflow.com/questions/12321133/golang-random-number-generator-how-to-seed-properly
+	// http://en.wikipedia.org/wiki/Pseudorandom_number_generator
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
