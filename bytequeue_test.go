@@ -75,7 +75,7 @@ func TestAvailableSpace(t *testing.T) {
 		}
 
 		if queue.head != checkHead {
-			t.Errorf("checkHead %d: %v vs %v; head: %d; tail: %d; count: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, dataLen)
+			t.Errorf("checkHead %d: %v vs %v; head: %d; tail: %d; numOfEntries: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.numOfEntries, dataLen)
 		}
 
 		// check tail
@@ -86,22 +86,22 @@ func TestAvailableSpace(t *testing.T) {
 		}
 
 		if queue.tail != checkTail {
-			t.Errorf("checkTail %d: %v vs %v; head: %d; tail: %d; count: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, dataLen)
+			t.Errorf("checkTail %d: %v vs %v; head: %d; tail: %d; numOfEntries: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.numOfEntries, dataLen)
 		}
 
 		// check available space
 		checkSpaceLeft = checkSpaceLeft - headerEntrySize - dataLen + queue.numOfPopBytes
 
 		if queue.availableSpaceAfterTail() != queue.debugCountX() {
-			t.Errorf("queue.debugCountX() %d: %v vs %v; head: %d; tail: %d; count: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, dataLen)
+			t.Errorf("queue.debugCountX() %d: %v vs %v; head: %d; tail: %d; numOfEntries: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.numOfEntries, dataLen)
 		}
 
 		if queue.availableSpaceAfterTail() != checkSpaceLeft {
-			t.Errorf("checkSpaceLeft %d: %v vs %v; head: %d; tail: %d; count: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, dataLen)
+			t.Errorf("checkSpaceLeft %d: %v vs %v; head: %d; tail: %d; numOfEntries: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.numOfEntries, dataLen)
 		}
 
 		if queue.availableSpaceAfterTail() != queue.numOfAvailableBytes {
-			t.Errorf("queue.numOfAvailableBytes %d: %v vs %v; head: %d; tail: %d; count: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.count, dataLen)
+			t.Errorf("queue.numOfAvailableBytes %d: %v vs %v; head: %d; tail: %d; numOfEntries: %d; dataLen: %d", i, queue.availableSpaceAfterTail(), queue.debugCountX(), queue.head, queue.tail, queue.numOfEntries, dataLen)
 		}
 	}
 }

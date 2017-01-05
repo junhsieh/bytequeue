@@ -23,7 +23,7 @@ type ByteQueue struct {
 	byteArr      []byte
 	head         int
 	tail         int
-	count        int // number of entries
+	numOfEntries int // number of entries
 	capacity     int
 	headerBuffer []byte
 
@@ -47,7 +47,7 @@ func NewByteQueue(capacityMB int) *ByteQueue {
 }
 
 func (bq *ByteQueue) Pop() ([]byte, error) {
-	if bq.count == 0 {
+	if bq.numOfEntries == 0 {
 		return nil, errors.New("Empty queue")
 	}
 
@@ -99,7 +99,7 @@ func (bq *ByteQueue) Pop() ([]byte, error) {
 	}
 
 	//
-	bq.count--
+	bq.numOfEntries--
 
 	return data, nil
 }
@@ -135,12 +135,8 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 
 			// DEBUG
 			if bq.enableByteArrDetail == true {
-				fmt.Printf("info    (after pop):\t\tentryLen: %d\t\thead: %d\t\ttail: %d\t\tcount: %d\t\tavailable: %d\n",
-					entryLen,
-					bq.head,
-					bq.tail,
-					bq.count,
-					bq.availableSpaceAfterTail())
+				fmt.Printf("info    (after pop):\t\tentryLen: %d\t\thead: %d\t\ttail: %d\t\tnumOfEntries: %d\t\tavailable: %d\n",
+					entryLen, bq.head, bq.tail, bq.numOfEntries, bq.availableSpaceAfterTail())
 				fmt.Printf("                   : %s\n", bq.debugGenByte())
 				fmt.Printf("byteArr (after pop): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
 				fmt.Printf("\n")
@@ -159,7 +155,7 @@ func (bq *ByteQueue) Push(data []byte) (int, error) {
 	bq.setByteArr(data)
 
 	//
-	bq.count++
+	bq.numOfEntries++
 
 	if bq.enableByteArrDetail == true {
 		fmt.Printf("byteArr (afte push): %02v\n", bq.debugHighlightByteArr(bq.byteArr))
@@ -192,7 +188,7 @@ func (bq *ByteQueue) availableSpaceAfterTail() int {
 		return bq.head - bq.tail
 	}
 
-	if bq.count > 0 {
+	if bq.numOfEntries > 0 {
 		return 0
 	} else {
 		return bq.capacity
